@@ -6,12 +6,11 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q> {
 
-    Map<Q, Queue<T>> queuesMap;
+    final private Map<Q, Queue<T>> queuesMap;
 
     /**
      * Initialize empty {@link MultiQueueImpl}
@@ -27,8 +26,8 @@ public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q> {
      * @return associated queue
      * @throws IllegalArgumentException if key {@code queue} as not associated queue
      */
-    private Queue<T> getRequiredQueue(Q queue) {
-        Queue<T> q = this.queuesMap.get(queue);
+    private Queue<T> getRequiredQueue(final Q queue) {
+        final Queue<T> q = this.queuesMap.get(queue);
         if (q == null) {
             throw new IllegalArgumentException("Queue " + queue + "is not available");
         }
@@ -42,15 +41,9 @@ public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q> {
      * @return list of peeked elements
      * @throws IllegalArgumentException if key {@code queue} as not associated queue
      */
-    private List<T> peekAllElements(Q queue) {
-        Queue<T> q = this.getRequiredQueue(queue);
-        List<T> elements = new LinkedList<>();
-
-        Iterator<T> queueIterator = q.iterator();
-        while (queueIterator.hasNext()) {
-            T e = queueIterator.next();
-            elements.add(e);
-        }
+    private List<T> peekAllElements(final Q queue) {
+        final Queue<T> q = this.getRequiredQueue(queue);
+        final List<T> elements = new LinkedList<>(q);
         return elements;
     }
 
@@ -60,7 +53,7 @@ public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q> {
     }
 
     @Override
-    public void openNewQueue(Q queue) {
+    public void openNewQueue(final Q queue) {
         if (this.queuesMap.containsKey(queue)) {
             throw new IllegalArgumentException("Qeueue " + queue + "is already available");
         }
@@ -68,29 +61,29 @@ public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q> {
     }
 
     @Override
-    public boolean isQueueEmpty(Q queue) {
-        Queue<T> q = this.getRequiredQueue(queue);
+    public boolean isQueueEmpty(final Q queue) {
+        final Queue<T> q = this.getRequiredQueue(queue);
         return q.isEmpty();
     }
 
     @Override
-    public void enqueue(T elem, Q queue) {
-        Queue<T> q = this.getRequiredQueue(queue);
+    public void enqueue(final T elem, final Q queue) {
+        final Queue<T> q = this.getRequiredQueue(queue);
         q.offer(elem);
     }
 
     @Override
-    public T dequeue(Q queue) {
-        Queue<T> q = this.getRequiredQueue(queue);
+    public T dequeue(final Q queue) {
+        final Queue<T> q = this.getRequiredQueue(queue);
         return q.poll();
     }
 
     @Override
     public Map<Q, T> dequeueOneFromAllQueues() {
-        Map<Q, T> dequeuedValsMap = new HashMap<>();
-        for (Q queue : this.queuesMap.keySet()) {
-            Queue<T> q = this.getRequiredQueue(queue);
-            T val = q.poll();
+        final Map<Q, T> dequeuedValsMap = new HashMap<>();
+        for (final Q queue : this.queuesMap.keySet()) {
+            final Queue<T> q = this.getRequiredQueue(queue);
+            final T val = q.poll();
             dequeuedValsMap.put(queue, val);
         }
         return dequeuedValsMap;
@@ -98,18 +91,18 @@ public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q> {
 
     @Override
     public Set<T> allEnqueuedElements() {
-        Set<T> enqueuedElementsSet = new HashSet<>();
-        for (Q queue : this.queuesMap.keySet()) {
-            List<T> elements = this.peekAllElements(queue);
+        final Set<T> enqueuedElementsSet = new HashSet<>();
+        for (final Q queue : this.queuesMap.keySet()) {
+            final List<T> elements = this.peekAllElements(queue);
             enqueuedElementsSet.addAll(elements);
         }
         return enqueuedElementsSet;
     }
 
     @Override
-    public List<T> dequeueAllFromQueue(Q queue) {
-        Queue<T> q = this.getRequiredQueue(queue);
-        List<T> elements = new LinkedList<>();
+    public List<T> dequeueAllFromQueue(final Q queue) {
+        final Queue<T> q = this.getRequiredQueue(queue);
+        final List<T> elements = new LinkedList<>();
         while (!q.isEmpty()) {
             elements.add(q.poll());
         }
@@ -117,11 +110,11 @@ public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q> {
     }
 
     @Override
-    public void closeQueueAndReallocate(Q queue) {
-        List<T> elements = dequeueAllFromQueue(queue);
-        for (Q key : this.queuesMap.keySet()) {
+    public void closeQueueAndReallocate(final Q queue) {
+        final List<T> elements = dequeueAllFromQueue(queue);
+        for (final Q key : this.queuesMap.keySet()) {
             if (key != queue) {
-                Queue<T> q = this.getRequiredQueue(key);
+                final Queue<T> q = this.getRequiredQueue(key);
                 q.addAll(elements);
                 this.queuesMap.remove(queue);
                 return;
